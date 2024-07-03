@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"],
+        input[type="number"],
+        input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Student Management</h1>
+
+    <!-- Add Student Form -->
+    <form id="addStudentForm">
+        <h2>Add Student</h2>
+        <label for="addStudentId">Student ID:</label>
+        <input type="number" id="addStudentId" required>
+        
+        <label for="addFirstName">First Name:</label>
+        <input type="text" id="addFirstName" required>
+        
+        <label for="addLastName">Last Name:</label>
+        <input type="text" id="addLastName" required>
+        
+        <label for="addDob">Date of Birth:</label>
+        <input type="date" id="addDob" required>
+        
+        <label for="addAmountDue">Amount Due:</label>
+        <input type="number" step="0.01" id="addAmountDue" required>
+        
+        <button type="submit">Add Student</button>
+    </form>
+
+    <!-- Update Student Form -->
+    <form id="updateStudentForm">
+        <h2>Update Student</h2>
+        <label for="updateStudentId">Student ID:</label>
+        <input type="number" id="updateStudentId" required>
+        
+        <label for="updateFirstName">First Name:</label>
+        <input type="text" id="updateFirstName" required>
+        
+        <label for="updateLastName">Last Name:</label>
+        <input type="text" id="updateLastName" required>
+        
+        <label for="updateDob">Date of Birth:</label>
+        <input type="date" id="updateDob" required>
+        
+        <label for="updateAmountDue">Amount Due:</label>
+        <input type="number" step="0.01" id="updateAmountDue" required>
+        
+        <button type="submit">Update Student</button>
+    </form>
+
+    <!-- Delete Student Form -->
+    <form id="deleteStudentForm">
+        <h2>Delete Student</h2>
+        <label for="deleteStudentId">Student ID:</label>
+        <input type="number" id="deleteStudentId" required>
+        
+        <button type="submit">Delete Student</button>
+    </form>
+
+    <!-- Get Student Form -->
+    <form id="getStudentForm">
+        <h2>Get Student</h2>
+        <label for="getStudentId">Student ID:</label>
+        <input type="number" id="getStudentId" required>
+        
+        <button type="submit">Get Student</button>
+    </form>
+
+    <!-- Display Students -->
+    <h2>All Students</h2>
+    <button id="refreshStudents">Refresh List</button>
+    <table id="studentsTable">
+        <thead>
+            <tr>
+                <th>Student ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Date of Birth</th>
+                <th>Amount Due</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be inserted here dynamically -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add Student
+        document.getElementById('addStudentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const studentData = {
+                student_id: document.getElementById('addStudentId').value,
+                first_name: document.getElementById('addFirstName').value,
+                last_name: document.getElementById('addLastName').value,
+                dob: document.getElementById('addDob').value,
+                amount_due: document.getElementById('addAmountDue').value
+            };
+            fetch('/student', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(studentData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                refreshStudentsList();
+            });
+        });
+
+        // Update Student
+        document.getElementById('updateStudentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const studentId = document.getElementById('updateStudentId').value;
+            const studentData = {
+                first_name: document.getElementById('updateFirstName').value,
+                last_name: document.getElementById('updateLastName').value,
+                dob: document.getElementById('updateDob').value,
+                amount_due: document.getElementById('updateAmountDue').value
+            };
+            fetch(`/student/${studentId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(studentData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                refreshStudentsList();
+            });
+        });
+
+        // Delete Student
+        document.getElementById('deleteStudentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const studentId = document.getElementById('deleteStudentId').value;
+            fetch(`/student/${studentId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                refreshStudentsList();
+            });
+        });
+
+        // Get Student
+        document.getElementById('getStudentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const studentId = document.getElementById('getStudentId').value;
+            fetch(`/student/${studentId}`)
+            .then(response => response.json())
+            .then(student => {
+                alert(`Student ID: ${student.student_id}\nFirst Name: ${student.first_name}\nLast Name: ${student.last_name}\nDate of Birth: ${student.dob}\nAmount Due: ${student.amount_due}`);
+            });
+        });
+
+        // Refresh Students List
+        document.getElementById('refreshStudents').addEventListener('click', function() {
+            refreshStudentsList();
+        });
+
+        // Function to refresh the students list
+        function refreshStudentsList() {
+            fetch('/students')
+            .then(response => response.json())
+            .then(students => {
+                const tableBody = document.getElementById('studentsTable').querySelector('tbody');
+                tableBody.innerHTML = '';
+                students.forEach(student => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${student.student_id}</td>
+                        <td>${student.first_name}</td>
+                        <td>${student.last_name}</td>
+                        <td>${student.dob}</td>
+                        <td>${student.amount_due}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            });
+        }
+
+        // Initial refresh of students list
+        refreshStudentsList();
+    });
+</script>
+
+</body>
+</html>
